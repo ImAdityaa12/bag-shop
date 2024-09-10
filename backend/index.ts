@@ -5,9 +5,9 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
-// mongoose
-//   .connect(process.env.MONGODB_CONNECTION_STRING as string)
-//   .then(() => console.log("Connected to database!"));
+mongoose
+  .connect(process.env.MONGODB_CONNECTION_STRING as string)
+  .then(() => console.log("Connected to database!"));
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
