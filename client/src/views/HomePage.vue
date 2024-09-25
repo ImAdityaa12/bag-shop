@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import Button from "./ui/button/Button.vue";
-const count = ref(0);
+// import { Button } from "../components/ui/button";
+import { Button } from "@/components/ui/button";
 </script>
 
 <template>
