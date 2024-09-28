@@ -1,4 +1,4 @@
-import { mongoose } from "mongoose";
+import mongoose from "mongoose";
 
 const ownerSchema = new mongoose.Schema({
   fullName: {
@@ -13,7 +13,7 @@ const ownerSchema = new mongoose.Schema({
     default: [],
   },
   picture: String,
-  picture: String,
+  gstin: String,
 });
 
-export default mongoose.model("owner", ownerSchema);
+export default mongoose.model("Owner", ownerSchema);

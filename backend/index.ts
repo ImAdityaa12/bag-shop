@@ -3,7 +3,9 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-
+import ownerRouter from "./routes/ownersRouter";
+import usersRouter from "./routes/usersRouter";
+import productsRouter from "./routes/productsRouter";
 dotenv.config();
 mongoose
   .connect(process.env.MONGODB_CONNECTION_STRING as string)
@@ -17,9 +19,9 @@ app.use(
     credentials: true,
   })
 );
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+app.use("/owners", ownerRouter);
+app.use("/users", usersRouter);
+app.use("/products", productsRouter);
 app.listen(7000, () => {
   console.log("Server started on localhost 7000");
 });
