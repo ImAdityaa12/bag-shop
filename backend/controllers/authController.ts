@@ -6,6 +6,10 @@ import { generateToken } from "../utils/generateToken";
 export async function authController(req: Request, res: Response) {
   try {
     const { fullName, email, password } = req.body;
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser) {
+      return res.status(400).send("User already exists");
+    }
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
     const user = await userModel.create({ fullName, email, password: hash });

@@ -75,13 +75,19 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { handleSignUp } from "@/api/registerAPI";
+import { handleLoginAPI } from "@/api/loginAPI";
+import { useRouter } from "vue-router";
+import { useToast } from "@/components/ui/toast/use-toast";
+import { getCookie } from "@/lib/utils";
+const { toast } = useToast();
+const router = useRouter();
 const createForm = reactive({
   name: "",
   email: "",
@@ -92,19 +98,60 @@ const loginForm = reactive({
   email: "",
   password: "",
 });
+const cookieValue = ref<string | null>(null);
+onMounted(() => {
+  const token = getCookie("token");
+  cookieValue.value = token ?? null;
+  if (cookieValue.value) {
+    router.push("/");
+  }
+});
+const handleCreateAccount = async () => {
+  try {
+    const response = await handleSignUp({
+      email: createForm.email,
+      password: createForm.password,
+      fullName: createForm.name,
+    });
+    if (response.status === 201) {
+      Object.assign(createForm, {
+        name: "",
+        email: "",
+        password: "",
+      });
+      toast({
+        title: "Account Created",
+      });
 
-const handleCreateAccount = () => {
-  console.log("Create Account:", createForm);
-  // Reset form after submission
-  createForm.name = "";
-  createForm.email = "";
-  createForm.password = "";
+      setTimeout(() => router.push("/"), 1000);
+    }
+  } catch (error) {
+    console.error(error);
+  }
 };
-
-const handleLogin = () => {
-  console.log("Login:", loginForm);
-  // Reset form after submission
-  loginForm.email = "";
-  loginForm.password = "";
+const handleLogin = async () => {
+  try {
+    const response = await handleLoginAPI({
+      email: loginForm.email,
+      password: loginForm.password,
+    });
+    if (response.status === 200) {
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+      });
+      Object.assign(loginForm, {
+        email: "",
+        password: "",
+      });
+      setTimeout(() => router.push("/"), 1000); // Delay navigation
+    }
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "An unexpected error occurred. Please try again.",
+      variant: "destructive",
+    });
+  }
 };
 </script>
