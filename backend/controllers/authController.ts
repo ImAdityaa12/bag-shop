@@ -3,7 +3,7 @@ import userModel from "../models/userModel";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/generateToken";
 
-export async function authController(req: Request, res: Response) {
+export async function registerContoller(req: Request, res: Response) {
   try {
     const { fullName, email, password } = req.body;
     const existingUser = await userModel.findOne({ email });
@@ -40,5 +40,14 @@ export async function loginController(req: Request, res: Response) {
     }
   } catch (error) {
     return res.status(500).send("An error occurred while Logging");
+  }
+}
+
+export async function logoutController(req: Request, res: Response) {
+  try {
+    res.clearCookie("token");
+    return res.status(200).json("Logged out successfully");
+  } catch (error) {
+    return res.status(500).send("An error occurred while Logging out");
   }
 }

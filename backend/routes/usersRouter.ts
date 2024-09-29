@@ -2,12 +2,14 @@ import express from "express";
 import userModel from "../models/userModel";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/generateToken";
-import { authController, loginController } from "../controllers/authController";
+import {
+  registerContoller,
+  loginController,
+  logoutController,
+} from "../controllers/authController";
 const router = express.Router();
-router.post("/register", authController);
-router.get("/", function (req, res) {
-  res.send("Hello World!");
-});
-
+router.post("/register", registerContoller);
 router.post("/login", loginController);
+router.get("/logout", logoutController);
+
 export default router;
