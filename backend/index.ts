@@ -4,10 +4,10 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import expressSession from "express-session";
-import flash from "express-flash";
 import ownerRouter from "./routes/ownersRouter";
 import usersRouter from "./routes/usersRouter";
 import productsRouter from "./routes/productsRouter";
+import flash from "connect-flash";
 dotenv.config();
 mongoose
   .connect(process.env.MONGODB_CONNECTION_STRING as string)
