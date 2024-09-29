@@ -3,7 +3,7 @@ import userModel from "../models/userModel";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/generateToken";
 
-export default async function authController(req: Request, res: Response) {
+export async function authController(req: Request, res: Response) {
   try {
     const { fullName, email, password } = req.body;
     const salt = await bcrypt.genSalt(10);
@@ -14,5 +14,27 @@ export default async function authController(req: Request, res: Response) {
     return res.status(201).json("User created successfully");
   } catch (error) {
     return res.status(500).send("An error occurred while creating the user.");
+  }
+}
+export async function loginController(req: Request, res: Response) {
+  try {
+    const { email, password } = req.body;
+    const user = await userModel.findOne({ email });
+    if (user) {
+      if (user.password) {
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (isMatch) {
+          const token = generateToken(email, user);
+          res.cookie("token", token);
+          return res.status(200).json("Logged in successfully");
+        } else {
+          return res.status(401).send("Invalid credentials");
+        }
+      }
+    } else {
+      return res.status(401).send("Invalid credentials");
+    }
+  } catch (error) {
+    return res.status(500).send("An error occurred while Logging");
   }
 }
