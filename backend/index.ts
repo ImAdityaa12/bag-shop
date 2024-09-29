@@ -3,6 +3,8 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import expressSession from "express-session";
+import flash from "express-flash";
 import ownerRouter from "./routes/ownersRouter";
 import usersRouter from "./routes/usersRouter";
 import productsRouter from "./routes/productsRouter";
@@ -19,6 +21,14 @@ app.use(
     credentials: true,
   })
 );
+app.use(
+  expressSession({
+    resave: true,
+    saveUninitialized: false,
+    secret: process.env.EXPRESS_SESSION_SECRET as string,
+  })
+);
+app.use(flash());
 app.use("/owners", ownerRouter);
 app.use("/users", usersRouter);
 app.use("/products", productsRouter);
