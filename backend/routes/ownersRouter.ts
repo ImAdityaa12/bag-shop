@@ -25,5 +25,4 @@ router.post("/create", async function (req, res) {
     return res.status(500).send("An error occurred while creating the owner.");
   }
 });
-
 export default router;
