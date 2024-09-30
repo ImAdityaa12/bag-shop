@@ -41,7 +41,7 @@
     <main class="flex-1 p-8 overflow-y-auto">
       <h1 class="text-3xl font-bold text-gray-800 mb-8">Create New Product</h1>
 
-      <form @submit.prevent="createProduct">
+      <form @submit.prevent="createProduct" enctype="multipart/form-data">
         <!-- Product Details Section -->
         <Card class="mb-8">
           <CardHeader>
@@ -167,6 +167,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/toast";
+import { handleAddProduct } from "@/api/createProductAPI";
 
 const productName = ref("");
 const productPrice = ref("");
@@ -180,17 +182,33 @@ const handleImageUpload = (event) => {
   productImage.value = event.target.files[0];
 };
 
-const createProduct = () => {
-  // Implement product creation logic here
-  console.log("Creating product:", {
-    productName: productName.value,
-    productPrice: productPrice.value,
-    discountPrice: discountPrice.value,
-    productImage: productImage.value,
-    backgroundColor: backgroundColor.value,
-    panelColor: panelColor.value,
-    textColor: textColor.value,
-  });
+const createProduct = async () => {
+  try {
+    console.log(productImage.value);
+    const response = await handleAddProduct({
+      name: productName.value,
+      file: productImage.value,
+      price: productPrice.value,
+      discount: discountPrice.value,
+      bgColor: backgroundColor.value,
+      panelColor: panelColor.value,
+      textColor: textColor.value,
+    });
+    // if (response.status === 201) {
+    //   toast({
+    //     title: "Success",
+    //     description: "Product created successfully!",
+    //     variant: "default",
+    //   });
+    // }
+  } catch (error) {
+    console.log(error);
+    toast({
+      title: "Error",
+      description: "An unexpected error occurred. Please try again.",
+      variant: "destructive",
+    });
+  }
 };
 
 const logout = () => {
