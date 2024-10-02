@@ -49,21 +49,21 @@
       <div class="container mx-auto px-4">
         <h3 class="text-2xl font-bold mb-8">Featured Products</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <Card v-for="product in featuredProducts" :key="product.id">
+          <Card v-for="product in featuredProducts" :key="product?.id">
             <CardContent class="p-0">
               <img
-                :src="product.image"
-                :alt="product.name"
-                class="w-full h-64 object-cover"
+                :src="getImageSrc(product)"
+                :alt="product?.name"
+                class="w-full h-48 object-contain"
               />
             </CardContent>
             <CardHeader>
-              <CardTitle>{{ product.name }}</CardTitle>
-              <CardDescription>{{ product.description }}</CardDescription>
+              <CardTitle>{{ product?.name }}</CardTitle>
+              <CardDescription>{{ product?.description }}</CardDescription>
             </CardHeader>
             <CardFooter class="flex justify-between">
               <span class="text-xl font-bold"
-                >${{ product.price.toFixed(2) }}</span
+                >${{ product?.price?.toFixed(2) }}</span
               >
               <Button>Add to Cart</Button>
             </CardFooter>
@@ -157,7 +157,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { ShoppingBagIcon } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -170,33 +170,34 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { getALLProductsAPI } from "@/api/getALLProductsAPI";
 
 const email = ref("");
+const featuredProducts = ref([]);
+const getProducts = async () => {
+  const response = await getALLProductsAPI();
+  if (response.status === 200) {
+    featuredProducts.value = response.data.splice(0, 3);
+  } else {
+    toast({
+      title: "An error occurred while fetching products. Please try again.",
+    });
+  }
+};
 
-const featuredProducts = [
-  {
-    id: 1,
-    name: "Classic Tote",
-    description: "A timeless tote bag perfect for everyday use",
-    price: 59.99,
-    image: "/placeholder.svg?height=400&width=600",
-  },
-  {
-    id: 2,
-    name: "Urban Backpack",
-    description: "Stylish and functional backpack for the modern explorer",
-    price: 79.99,
-    image: "/placeholder.svg?height=400&width=600",
-  },
-  {
-    id: 3,
-    name: "Leather Messenger",
-    description: "Professional messenger bag for work and beyond",
-    price: 89.99,
-    image: "/placeholder.svg?height=400&width=600",
-  },
-];
-
+// Called when the component is mounted
+onMounted(() => {
+  getProducts();
+});
+const getImageSrc = (product) => {
+  if (product?.image?.data && Array.isArray(product.image.data)) {
+    const binaryString = String.fromCharCode(
+      ...new Uint8Array(product.image.data)
+    );
+    return `data:image/jpeg;base64,${btoa(binaryString)}`;
+  }
+  return "";
+};
 const subscribeNewsletter = () => {
   // Implement newsletter subscription logic here
   console.log("Subscribing email:", email.value);
