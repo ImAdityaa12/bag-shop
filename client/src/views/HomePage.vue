@@ -171,6 +171,8 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getALLProductsAPI } from "@/api/getALLProductsAPI";
+import { getCookie } from "@/lib/utils";
+import router from "@/routes";
 
 const email = ref("");
 const featuredProducts = ref([]);
@@ -187,7 +189,12 @@ const getProducts = async () => {
 
 // Called when the component is mounted
 onMounted(() => {
-  getProducts();
+  let cookie = getCookie("token");
+  if (cookie) {
+    getProducts();
+  } else {
+    router.push("/create");
+  }
 });
 const getImageSrc = (product) => {
   if (product?.image?.data && Array.isArray(product.image.data)) {

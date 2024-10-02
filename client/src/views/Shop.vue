@@ -56,6 +56,8 @@ import {
 import Sidebar from "@/components/Sidebar.vue";
 import { getALLProductsAPI } from "@/api/getALLProductsAPI";
 import ShopLoadingSkeleton from "@/components/ShopLoadingSkeleton.vue";
+import { getCookie } from "@/lib/utils";
+import { useRouter } from "vue-router";
 
 // State for products and loading status
 const isLoading = ref(false);
@@ -77,8 +79,14 @@ const getProducts = async () => {
 };
 
 // Called when the component is mounted
+const router = useRouter();
 onMounted(() => {
-  getProducts();
+  let cookie = getCookie("token");
+  if (!cookie) {
+    router.push("/create");
+  } else {
+    getProducts();
+  }
 });
 
 // Convert image data to base64 format for rendering in <img> tag

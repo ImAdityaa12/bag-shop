@@ -121,7 +121,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import {
   HomeIcon,
   ShoppingBagIcon,
@@ -136,6 +136,8 @@ import { toast } from "@/components/ui/toast";
 import { handleAddProduct } from "@/api/createProductAPI";
 import { logoutAPI } from "@/api/logoutAPI";
 import Sidebar from "@/components/Sidebar.vue";
+import { getCookie } from "@/lib/utils";
+import { useRouter } from "vue-router";
 
 const productName = ref("");
 const productPrice = ref("");
@@ -149,7 +151,22 @@ const handleImageUpload = (event) => {
   productImage.value = event.target.files[0];
 };
 
+const router = useRouter();
+onMounted(() => {
+  let cookie = getCookie("token");
+  if (!cookie) {
+    router.push("/create");
+  }
+});
 const createProduct = async () => {
+  if (!productName.value || !productPrice.value || !productImage.value) {
+    toast({
+      title: "Error",
+      description: "Please fill in all required fields.",
+      variant: "destructive",
+    });
+    return;
+  }
   try {
     const response = await handleAddProduct({
       name: productName.value,
