@@ -169,6 +169,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { handleAddProduct } from "@/api/createProductAPI";
+import { logoutAPI } from "@/api/logoutAPI";
 
 const productName = ref("");
 const productPrice = ref("");
@@ -184,7 +185,6 @@ const handleImageUpload = (event) => {
 
 const createProduct = async () => {
   try {
-    console.log(productImage.value);
     const response = await handleAddProduct({
       name: productName.value,
       file: productImage.value,
@@ -194,15 +194,23 @@ const createProduct = async () => {
       panelColor: panelColor.value,
       textColor: textColor.value,
     });
-    // if (response.status === 201) {
-    //   toast({
-    //     title: "Success",
-    //     description: "Product created successfully!",
-    //     variant: "default",
-    //   });
-    // }
+
+    if (response.status === 201) {
+      toast({
+        title: "Success",
+        description: "Product created successfully!",
+        variant: "default",
+      });
+    } else {
+      // Handle other successful status codes if needed
+      toast({
+        title: "Success",
+        description: "Product created successfully!",
+        variant: "default",
+      });
+    }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     toast({
       title: "Error",
       description: "An unexpected error occurred. Please try again.",
@@ -211,8 +219,17 @@ const createProduct = async () => {
   }
 };
 
-const logout = () => {
-  // Implement logout logic here
-  console.log("Logging out...");
+const logout = async () => {
+  const response = await logoutAPI();
+  if (response.status === 200) {
+    toast({
+      title: "Logged Out Successfully",
+    });
+    router.push("/create");
+  } else {
+    toast({
+      title: "An error occurred while logging out. Please try again.",
+    });
+  }
 };
 </script>

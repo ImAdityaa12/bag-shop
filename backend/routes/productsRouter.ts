@@ -14,6 +14,6 @@ router.post("/create", upload.single("file"), async function (req, res) {
     panelColor,
     textColor,
   });
-  return res.status(201).send("Product created successfully");
+  return res.status(201).json("Product created successfully");
 });
 export default router;
