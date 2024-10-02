@@ -1,8 +1,12 @@
 <template>
-  <div class="flex h-screen bg-gray-100">
+  <div class="flex min-h-screen bg-gray-100">
     <Sidebar />
     <!-- Main Content -->
-    <main class="flex-1 p-6 overflow-auto">
+    <ShopLoadingSkeleton v-if="isLoading" />
+    <main
+      class="flex-1 p-6 overflow-auto ml-64 bg-gray-100"
+      v-if="products.length > 0 && !isLoading"
+    >
       <h1 class="text-2xl font-bold mb-6">Products</h1>
       <div
         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
@@ -13,11 +17,11 @@
           class="bg-white rounded-lg shadow-md overflow-hidden"
         >
           <img
-            :src="product.image"
+            :src="getImageSrc(product)"
             :alt="product.name"
-            class="w-full h-48 object-cover"
+            class="w-full h-48 object-contain"
           />
-          <div class="p-4">
+          <div class="p-4 bg-gray-200">
             <h2 class="font-semibold">{{ product.name }}</h2>
             <div class="flex justify-between items-center mt-2">
               <div>
@@ -41,7 +45,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import {
   HomeIcon,
   PackageIcon,
@@ -50,63 +54,48 @@ import {
   PlusIcon,
 } from "lucide-vue-next";
 import Sidebar from "@/components/Sidebar.vue";
+import { getALLProductsAPI } from "@/api/getALLProductsAPI";
+import ShopLoadingSkeleton from "@/components/ShopLoadingSkeleton.vue";
 
-const products = ref([
-  {
-    id: 1,
-    name: "Product 1",
-    price: 19.99,
-    discount: 10,
-    image: "/placeholder.svg",
-  },
-  {
-    id: 2,
-    name: "Product 2",
-    price: 29.99,
-    discount: 15,
-    image: "/placeholder.svg",
-  },
-  {
-    id: 3,
-    name: "Product 3",
-    price: 39.99,
-    discount: 20,
-    image: "/placeholder.svg",
-  },
-  {
-    id: 4,
-    name: "Product 4",
-    price: 49.99,
-    discount: 5,
-    image: "/placeholder.svg",
-  },
-  {
-    id: 5,
-    name: "Product 5",
-    price: 59.99,
-    discount: 25,
-    image: "/placeholder.svg",
-  },
-  {
-    id: 6,
-    name: "Product 6",
-    price: 69.99,
-    discount: 30,
-    image: "/placeholder.svg",
-  },
-]);
+// State for products and loading status
+const isLoading = ref(false);
+const products = ref([]);
 
-const logout = () => {
-  // Implement logout functionality
-  console.log("Logout clicked");
+// Fetch products when component is mounted
+const getProducts = async () => {
+  isLoading.value = true;
+  const response = await getALLProductsAPI();
+  if (response.status === 200) {
+    products.value = response.data;
+    isLoading.value = false;
+  } else {
+    toast({
+      title: "An error occurred while fetching products. Please try again.",
+    });
+    isLoading.value = false;
+  }
 };
+
+// Called when the component is mounted
+onMounted(() => {
+  getProducts();
+});
+
+// Convert image data to base64 format for rendering in <img> tag
+const getImageSrc = (product) => {
+  if (product?.image?.data && Array.isArray(product.image.data)) {
+    const binaryString = String.fromCharCode(
+      ...new Uint8Array(product.image.data)
+    );
+    return `data:image/jpeg;base64,${btoa(binaryString)}`;
+  }
+  return "";
+};
+
+// Menu items for sidebar
 const menuItems = [
   { name: "Homepage", path: "/", icon: HomeIcon },
   { name: "Products", path: "/products", icon: PackageIcon },
   { name: "Create Product", path: "/create-product", icon: PlusCircleIcon },
 ];
 </script>
-
-<style scoped>
-/* Add any component-specific styles here */
-</style>
