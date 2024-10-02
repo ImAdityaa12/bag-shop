@@ -1,3 +1,5 @@
+import { getCookie } from "@/lib/utils";
+
 type Product = {
   file: File;
   name: string;
@@ -21,6 +23,9 @@ export const handleAddProduct = async (product: Product) => {
   }
   const response = await fetch(`http://localhost:7000/products/create`, {
     method: "POST",
+    headers: {
+      Authorization: `Bearer ${getCookie("token")}`,
+    },
     body: formData,
     credentials: "include",
   });
