@@ -1,7 +1,9 @@
 <template>
-  <aside class="w-64 bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+  <aside
+    class="fixed h-screen w-64 bg-gradient-to-b from-gray-900 to-gray-800 text-white"
+  >
     <div class="p-6">
-      <h2 class="text-2xl font-bold mb-6 text-center">Dashboard</h2>
+      <h2 class="text-2xl font-bold mb-6 text-center tracking-wide">BagShop</h2>
       <nav class="space-y-4">
         <router-link
           v-for="(item, index) in menuItems"
@@ -31,16 +33,20 @@ import { logoutAPI } from "@/api/logoutAPI";
 import router from "@/routes";
 import {
   HomeIcon,
-  PackageIcon,
   PlusCircleIcon,
   LogOutIcon,
+  Heart,
+  UserCheck,
+  Contact,
 } from "lucide-vue-next";
 import { toast } from "./ui/toast";
 
 const menuItems = [
   { name: "Homepage", path: "/", icon: HomeIcon },
-  { name: "Products", path: "/products", icon: PackageIcon },
   { name: "Create Product", path: "/create-product", icon: PlusCircleIcon },
+  { name: "Favorites", path: "/favorites", icon: Heart },
+  { name: "About Us", path: "/about", icon: UserCheck },
+  { name: "Contact Us", path: "/contact", icon: Contact },
 ];
 const logout = async () => {
   const response = await logoutAPI();
