@@ -3,7 +3,7 @@
     <Sidebar />
 
     <!-- Main Content -->
-    <main class="flex-1 p-8 overflow-y-auto">
+    <main class="ml-64 flex-1 p-8 overflow-y-auto">
       <h1 class="text-3xl font-bold text-gray-800 mb-8">Create New Product</h1>
 
       <form @submit.prevent="createProduct" enctype="multipart/form-data">
