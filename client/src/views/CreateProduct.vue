@@ -1,41 +1,6 @@
 <template>
   <div class="flex h-screen bg-gray-100">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-white shadow-md">
-      <div class="p-4">
-        <h2 class="text-2xl font-bold text-gray-800">BagShop</h2>
-      </div>
-      <nav class="mt-6">
-        <a
-          href="/"
-          class="block px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-gray-800"
-        >
-          <HomeIcon class="inline-block w-5 h-5 mr-2" />
-          Home Page
-        </a>
-        <a
-          href="/products"
-          class="block px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-gray-800"
-        >
-          <ShoppingBagIcon class="inline-block w-5 h-5 mr-2" />
-          All Products
-        </a>
-        <a
-          href="/create-product"
-          class="block px-4 py-2 bg-gray-200 text-gray-800"
-        >
-          <PlusCircleIcon class="inline-block w-5 h-5 mr-2" />
-          Create A New Product
-        </a>
-        <button
-          @click="logout"
-          class="w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-100 hover:text-gray-800"
-        >
-          <LogOutIcon class="inline-block w-5 h-5 mr-2" />
-          Logout
-        </button>
-      </nav>
-    </aside>
+    <Sidebar />
 
     <!-- Main Content -->
     <main class="flex-1 p-8 overflow-y-auto">
@@ -170,6 +135,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { handleAddProduct } from "@/api/createProductAPI";
 import { logoutAPI } from "@/api/logoutAPI";
+import Sidebar from "@/components/Sidebar.vue";
 
 const productName = ref("");
 const productPrice = ref("");
