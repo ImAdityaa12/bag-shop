@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
 interface ProductImage {
   data: Buffer;
@@ -19,39 +19,68 @@ interface Product {
   quantity?: number;
 }
 
+const STORAGE_KEY = "products";
+
 export const useProductStore = defineStore("products", () => {
-  const products = ref<Product[]>([]);
-  // Actions
+  const loadFromStorage = (): Product[] => {
+    try {
+      const storedData = localStorage.getItem(STORAGE_KEY);
+      return storedData ? JSON.parse(storedData) : [];
+    } catch (error) {
+      console.error("Error loading from localStorage:", error);
+      return [];
+    }
+  };
+
+  const saveToStorage = (data: Product[]) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (error) {
+      console.error("Error saving to localStorage:", error);
+    }
+  };
+
+  const products = ref<Product[]>(loadFromStorage());
+
+  watch(
+    products,
+    (newProducts) => {
+      saveToStorage(newProducts);
+    },
+    { deep: true }
+  );
+
   function addProduct(product: Product) {
     const existingProduct = products.value.find((p) => p._id === product._id);
     if (existingProduct) {
       if (existingProduct.quantity === undefined) {
         existingProduct.quantity = 2;
-        return;
       } else {
-        existingProduct.quantity = existingProduct.quantity + 1;
-        return;
+        existingProduct.quantity++;
       }
+    } else {
+      products.value.push({ ...product, quantity: 1 });
     }
-    products.value.push(product);
-    localStorage.setItem("products", JSON.stringify(products.value));
   }
+
   function increaseQuantity(productId: string) {
     const product = products.value.find((p) => p._id === productId);
     if (product) {
-      product.quantity && product.quantity > 0
-        ? product.quantity++
-        : (product.quantity = 2);
+      product.quantity = (product.quantity || 1) + 1;
     }
   }
+
   function decreaseQuantity(productId: string) {
     const product = products.value.find((p) => p._id === productId);
     if (product) {
-      product.quantity && product.quantity > 1
-        ? product.quantity--
-        : removeProduct(productId);
+      if (product.quantity && product.quantity > 1) {
+        product.quantity--;
+      } else {
+        removeProduct(productId);
+      }
     }
   }
+
   function removeProduct(productId: string) {
     const index = products.value.findIndex((p) => p._id === productId);
     if (index !== -1) {
@@ -63,13 +92,11 @@ export const useProductStore = defineStore("products", () => {
     const product = products.value.find((p) => p._id === productId);
     if (product) {
       Object.assign(product, updates);
-      localStorage.setItem("products", JSON.stringify(products.value));
     }
   }
 
   function setProducts(newProducts: Product[]) {
     products.value = newProducts;
-    localStorage.setItem("products", JSON.stringify(products.value));
   }
 
   const totalProducts = () => products.value.length;
