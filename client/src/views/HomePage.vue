@@ -33,16 +33,6 @@
                   <SheetHeader>
                     <SheetTitle>Shopping Cart</SheetTitle>
                     <SheetDescription>
-                      <!-- <p
-                        class="text-secondary-foreground/70 w-full"
-                        v-if="productStore.products.length === 0"
-                      >
-                        Your cart is currently empty.
-                      </p>
-                      <div v-for="product in productStore.products">
-                        <p>{{ product.name }}</p>
-                      </div> -->
-
                       <div class="bg-white rounded-lg shadow-md p-6">
                         <div v-if="cart.length === 0" class="text-center py-8">
                           <ShoppingCartIcon
@@ -87,12 +77,24 @@
                                     <div class="flex items-center">
                                       <button
                                         class="text-gray-500 focus:outline-none focus:text-gray-600"
+                                        @click="
+                                          productStore.decreaseQuantity(
+                                            product._id
+                                          )
+                                        "
                                       >
                                         <MinusIcon class="w-4 h-4" />
                                       </button>
-                                      <span class="mx-2 text-gray-700">1</span>
+                                      <span class="mx-2 text-gray-700">{{
+                                        product.quantity || 1
+                                      }}</span>
                                       <button
                                         class="text-gray-500 focus:outline-none focus:text-gray-600"
+                                        @click="
+                                          productStore.increaseQuantity(
+                                            product._id
+                                          )
+                                        "
                                       >
                                         <PlusIcon class="w-4 h-4" />
                                       </button>
