@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema({
     type: Array,
     default: [],
   },
+  favItems: {
+    type: Array,
+    default: [],
+  },
   contact: Number,
   picture: String,
 });
