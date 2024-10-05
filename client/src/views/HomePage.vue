@@ -23,6 +23,139 @@
                 <Button variant="ghost">Contact</Button>
               </RouterLink>
             </li>
+            <li>
+              <Sheet>
+                <SheetTrigger>
+                  <Button variant="ghost"> Cart </Button>
+                </SheetTrigger>
+
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Shopping Cart</SheetTitle>
+                    <SheetDescription>
+                      <!-- <p
+                        class="text-secondary-foreground/70 w-full"
+                        v-if="productStore.products.length === 0"
+                      >
+                        Your cart is currently empty.
+                      </p>
+                      <div v-for="product in productStore.products">
+                        <p>{{ product.name }}</p>
+                      </div> -->
+
+                      <div class="bg-white rounded-lg shadow-md p-6">
+                        <div v-if="cart.length === 0" class="text-center py-8">
+                          <ShoppingCartIcon
+                            class="w-16 h-16 text-gray-400 mx-auto mb-4"
+                          />
+                          <p class="text-gray-600">Your cart is empty</p>
+                        </div>
+                        <div v-else>
+                          <div class="flow-root">
+                            <ul class="-my-6 divide-y divide-gray-200">
+                              <li
+                                v-for="product in productStore.products"
+                                :key="product._id"
+                                class="py-6 flex"
+                              >
+                                <div
+                                  class="flex-shrink-0 w-24 h-24 border border-gray-200 rounded-md overflow-hidden"
+                                >
+                                  <img
+                                    :src="getImageSrc(product)"
+                                    :alt="product.name"
+                                    class="w-full h-full object-center object-cover"
+                                  />
+                                </div>
+                                <div class="ml-4 flex-1 flex flex-col">
+                                  <div>
+                                    <div
+                                      class="flex justify-between text-base font-medium text-gray-900"
+                                    >
+                                      <h3>{{ product.name }}</h3>
+                                      <p class="ml-4">
+                                        ${{ product.price.toFixed(2) }}
+                                      </p>
+                                    </div>
+                                    <p class="mt-1 text-sm text-gray-500">
+                                      {{ product.bgColor }}
+                                    </p>
+                                  </div>
+                                  <div
+                                    class="flex-1 flex items-end justify-between text-sm"
+                                  >
+                                    <div class="flex items-center">
+                                      <button
+                                        class="text-gray-500 focus:outline-none focus:text-gray-600"
+                                      >
+                                        <MinusIcon class="w-4 h-4" />
+                                      </button>
+                                      <span class="mx-2 text-gray-700">1</span>
+                                      <button
+                                        class="text-gray-500 focus:outline-none focus:text-gray-600"
+                                      >
+                                        <PlusIcon class="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                    <div class="flex">
+                                      <button
+                                        @click="
+                                          productStore.removeProduct(
+                                            product._id
+                                          )
+                                        "
+                                        class="font-medium text-indigo-600 hover:text-indigo-500"
+                                      >
+                                        Remove
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </li>
+                            </ul>
+                          </div>
+                          <div class="mt-8">
+                            <div
+                              class="flex justify-between text-base font-medium text-gray-900"
+                            >
+                              <p>Subtotal</p>
+                              <p>
+                                ${{ productStore.getTotalValue().toFixed(2) }}
+                              </p>
+                            </div>
+                            <p class="mt-0.5 text-sm text-gray-500">
+                              Shipping and taxes calculated at checkout.
+                            </p>
+                            <div class="mt-6">
+                              <button
+                                @click="checkout"
+                                class="w-full bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                              >
+                                Checkout
+                              </button>
+                            </div>
+                            <div
+                              class="mt-6 flex justify-center text-sm text-center text-gray-500"
+                            >
+                              <p>
+                                or
+                                <button
+                                  @click="continueShopping"
+                                  class="text-indigo-600 font-medium hover:text-indigo-500"
+                                >
+                                  Continue Shopping
+                                  <span aria-hidden="true"> &rarr;</span>
+                                </button>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </SheetDescription>
+                  </SheetHeader>
+                </SheetContent>
+              </Sheet>
+            </li>
           </ul>
         </nav>
       </div>
@@ -38,7 +171,6 @@
         <Button asChild size="lg">
           <router-link to="/shop" class="inline-flex items-center">
             Shop Now
-            <ShoppingBagIcon class="ml-2 h-5 w-5" />
           </router-link>
         </Button>
       </div>
@@ -65,7 +197,14 @@
               <span class="text-xl font-bold"
                 >${{ product?.price?.toFixed(2) }}</span
               >
-              <Button>Add to Cart</Button>
+              <Button
+                @click="productStore.addProduct(product)"
+                v-if="!productStore.products.includes(product)"
+                >{{ "Add to Cart" }}</Button
+              >
+              <Button @click="productStore.removeProduct(product._id)" v-else>{{
+                "Remove from Cart"
+              }}</Button>
             </CardFooter>
           </Card>
         </div>
@@ -157,8 +296,15 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
-import { ShoppingBagIcon } from "lucide-vue-next";
+import { onMounted, ref, computed } from "vue";
+import {
+  MinusIcon,
+  Plus,
+  PlusIcon,
+  ShoppingBagIcon,
+  ShoppingCartIcon,
+  X,
+} from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -169,13 +315,24 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { getALLProductsAPI } from "@/api/getALLProductsAPI";
 import { getCookie } from "@/lib/utils";
+import { useProductStore } from "@/store/cart";
 import router from "@/routes";
-
 const email = ref("");
+
 const featuredProducts = ref([]);
+const productStore = useProductStore();
+
 const getProducts = async () => {
   const response = await getALLProductsAPI();
   if (response.status === 200) {
@@ -192,6 +349,10 @@ onMounted(() => {
   let cookie = getCookie("token");
   if (cookie) {
     getProducts();
+    const products = localStorage.getItem("products");
+    if (products) {
+      productStore.setProducts(JSON.parse(products));
+    }
   } else {
     router.push("/create");
   }
@@ -210,5 +371,55 @@ const subscribeNewsletter = () => {
   console.log("Subscribing email:", email.value);
   // Reset email input after submission
   email.value = "";
+};
+
+const cart = ref([
+  {
+    id: 1,
+    name: "Throwback Hip Bag",
+    color: "Salmon",
+    price: 90.0,
+    quantity: 1,
+    image: "/placeholder.svg?height=200&width=200",
+  },
+  {
+    id: 2,
+    name: "Medium Stuff Satchel",
+    color: "Blue",
+    price: 32.0,
+    quantity: 1,
+    image: "/placeholder.svg?height=200&width=200",
+  },
+]);
+
+const subtotal = computed(() => {
+  return cart.value.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
+});
+
+const increaseQuantity = (item) => {
+  item.quantity++;
+};
+
+const decreaseQuantity = (item) => {
+  if (item.quantity > 1) {
+    item.quantity--;
+  }
+};
+
+const removeItem = (itemToRemove) => {
+  cart.value = cart.value.filter((item) => item.id !== itemToRemove.id);
+};
+
+const checkout = () => {
+  // Implement checkout logic here
+  console.log("Proceeding to checkout");
+};
+
+const continueShopping = () => {
+  // Implement continue shopping logic here
+  console.log("Continuing shopping");
 };
 </script>
