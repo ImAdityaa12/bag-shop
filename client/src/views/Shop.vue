@@ -24,7 +24,10 @@
               :alt="product.name"
               class="w-full h-48 object-contain"
             />
-            <div class="absolute top-2 right-2 cursor-pointer">
+            <div
+              class="absolute top-2 right-2 cursor-pointer"
+              @click="addFav(product._id)"
+            >
               <Heart />
             </div>
             <div class="p-4 bg-gray-200">
@@ -61,26 +64,18 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref } from "vue";
-import {
-  HomeIcon,
-  PackageIcon,
-  PlusCircleIcon,
-  LogOutIcon,
-  PlusIcon,
-  Check,
-  Heart,
-} from "lucide-vue-next";
+import { PlusIcon, Check, Heart } from "lucide-vue-next";
 import Sidebar from "@/components/Sidebar.vue";
 import { getALLProductsAPI } from "@/api/getALLProductsAPI";
-import ShopLoadingSkeleton from "@/components/ShopLoadingSkeleton.vue";
 import { getCookie } from "@/lib/utils";
 import { useRouter } from "vue-router";
 import Navbar from "@/components/Navbar.vue";
 import { Button } from "@/components/ui/button";
 import { useProductStore } from "@/store/cart";
-import { storeToRefs } from "pinia";
+import { addFavariteItemAPI } from "@/api/addFavariteItemAPI";
+import { toast } from "@/components/ui/toast";
 const productStore = useProductStore();
 // State for products and loading status
 const isLoading = ref(false);
@@ -112,8 +107,28 @@ onMounted(() => {
   }
 });
 
+const addFav = async (productId: string) => {
+  try {
+    const response = await addFavariteItemAPI(productId);
+    if (response.status === 200) {
+      toast({
+        title: "Product added to favorites",
+      });
+    } else {
+      toast({
+        title:
+          "An error occurred while adding product to favorites. Please try again.",
+      });
+    }
+  } catch (error) {
+    toast({
+      title:
+        "An error occurred while adding product to favorites. Please try again.",
+    });
+  }
+};
 // Convert image data to base64 format for rendering in <img> tag
-const getImageSrc = (product) => {
+const getImageSrc = (product: any) => {
   if (product?.image?.data && Array.isArray(product.image.data)) {
     const binaryString = String.fromCharCode(
       ...new Uint8Array(product.image.data)
@@ -122,11 +137,4 @@ const getImageSrc = (product) => {
   }
   return "";
 };
-
-// Menu items for sidebar
-const menuItems = [
-  { name: "Homepage", path: "/", icon: HomeIcon },
-  { name: "Products", path: "/products", icon: PackageIcon },
-  { name: "Create Product", path: "/create-product", icon: PlusCircleIcon },
-];
 </script>
