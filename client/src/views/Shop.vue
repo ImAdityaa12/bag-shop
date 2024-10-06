@@ -2,45 +2,62 @@
   <div class="flex min-h-screen bg-gray-100">
     <Sidebar />
     <!-- Main Content -->
-    <ShopLoadingSkeleton v-if="isLoading" />
-    <main
-      class="flex-1 p-6 overflow-auto ml-64 bg-gray-100"
-      v-if="products.length > 0 && !isLoading"
-    >
-      <h1 class="text-2xl font-bold mb-6">Products</h1>
-      <div
-        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+
+    <div class="flex flex-col gap-2 w-full">
+      <Navbar />
+      <!-- <ShopLoadingSkeleton v-if="isLoading" /> -->
+      <main
+        class="flex-1 p-6 overflow-auto ml-64 bg-gray-100"
+        v-if="products.length > 0 && !isLoading"
       >
+        <h1 class="text-2xl font-bold mb-6">Products</h1>
         <div
-          v-for="product in products"
-          :key="product.id"
-          class="bg-white rounded-lg shadow-md overflow-hidden"
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
         >
-          <img
-            :src="getImageSrc(product)"
-            :alt="product.name"
-            class="w-full h-48 object-contain"
-          />
-          <div class="p-4 bg-gray-200">
-            <h2 class="font-semibold">{{ product.name }}</h2>
-            <div class="flex justify-between items-center mt-2">
-              <div>
-                <span class="text-lg font-bold"
-                  >${{ product.price.toFixed(2) }}</span
+          <div
+            v-for="product in products"
+            :key="product.id"
+            class="relative bg-white rounded-lg shadow-md overflow-hidden"
+          >
+            <img
+              :src="getImageSrc(product)"
+              :alt="product.name"
+              class="w-full h-48 object-contain"
+            />
+            <div class="absolute top-2 right-2 cursor-pointer">
+              <Heart />
+            </div>
+            <div class="p-4 bg-gray-200">
+              <h2 class="font-semibold">{{ product.name }}</h2>
+              <div class="flex justify-between items-center mt-2">
+                <div>
+                  <span class="text-lg font-bold"
+                    >${{ product.price.toFixed(2) }}</span
+                  >
+                  <span class="text-sm text-green-600 ml-2"
+                    >-{{ product.discount }}%</span
+                  >
+                </div>
+                <Button
+                  @click="productStore.addProduct(product)"
+                  v-if="
+                    !productStore.products.some((p) => p._id === product._id)
+                  "
                 >
-                <span class="text-sm text-green-600 ml-2"
-                  >-{{ product.discount }}%</span
+                  <PlusIcon />
+                </Button>
+                <Button
+                  v-else
+                  @click="productStore.increaseQuantity(product._id)"
                 >
+                  <Check />
+                </Button>
               </div>
-              <button class="text-gray-500 hover:text-gray-700">
-                <PlusIcon class="w-5 h-5" />
-                <span class="sr-only">Add to favorites</span>
-              </button>
             </div>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   </div>
 </template>
 
@@ -52,13 +69,19 @@ import {
   PlusCircleIcon,
   LogOutIcon,
   PlusIcon,
+  Check,
+  Heart,
 } from "lucide-vue-next";
 import Sidebar from "@/components/Sidebar.vue";
 import { getALLProductsAPI } from "@/api/getALLProductsAPI";
 import ShopLoadingSkeleton from "@/components/ShopLoadingSkeleton.vue";
 import { getCookie } from "@/lib/utils";
 import { useRouter } from "vue-router";
-
+import Navbar from "@/components/Navbar.vue";
+import { Button } from "@/components/ui/button";
+import { useProductStore } from "@/store/cart";
+import { storeToRefs } from "pinia";
+const productStore = useProductStore();
 // State for products and loading status
 const isLoading = ref(false);
 const products = ref([]);
