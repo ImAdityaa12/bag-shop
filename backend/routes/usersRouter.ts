@@ -1,14 +1,9 @@
 import express from "express";
-import userModel from "../models/userModel";
-import bcrypt from "bcrypt";
-import { generateToken } from "../utils/generateToken";
 import {
   registerContoller,
   loginController,
   logoutController,
 } from "../controllers/authController";
-import productModel from "../models/productModel";
-import jwt from "jsonwebtoken";
 import {
   addFavItemsController,
   removeFavItemsController,
