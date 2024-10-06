@@ -196,17 +196,20 @@
               <CardDescription>{{ product?.description }}</CardDescription>
             </CardHeader>
             <CardFooter class="flex justify-between">
-              <span class="text-xl font-bold"
-                >${{ product?.price?.toFixed(2) }}</span
-              >
+              <span class="text-xl font-bold">
+                ${{ product?.price?.toFixed(2) }}
+              </span>
               <Button
                 @click="productStore.addProduct(product)"
-                v-if="!productStore.products.includes(product)"
-                >{{ "Add to Cart" }}</Button
+                v-if="!products.some((p) => p._id === product._id)"
+                >{{ "Add to Cart" }}
+              </Button>
+              <Button
+                v-else
+                @click="productStore.increaseQuantity(product._id)"
               >
-              <Button @click="productStore.removeProduct(product._id)" v-else>{{
-                "Remove from Cart"
-              }}</Button>
+                {{ "Added to Cart" }}
+              </Button>
             </CardFooter>
           </Card>
         </div>
@@ -329,12 +332,13 @@ import { Separator } from "@/components/ui/separator";
 import { getALLProductsAPI } from "@/api/getALLProductsAPI";
 import { getCookie } from "@/lib/utils";
 import { useProductStore } from "@/store/cart";
+import { storeToRefs } from "pinia";
 import router from "@/routes";
 const email = ref("");
 
 const featuredProducts = ref([]);
 const productStore = useProductStore();
-
+const { products } = storeToRefs(productStore);
 const getProducts = async () => {
   const response = await getALLProductsAPI();
   if (response.status === 200) {
