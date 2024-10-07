@@ -51,7 +51,7 @@
                                 class="flex-shrink-0 w-24 h-24 border border-gray-200 rounded-md overflow-hidden"
                               >
                                 <img
-                                  :src="getImageSrc(product)"
+                                  :src="`data:image/png;base64,${product.image}`"
                                   :alt="product.name"
                                   class="w-full h-full object-center object-cover"
                                 />
