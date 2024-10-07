@@ -24,7 +24,7 @@
           <Card v-for="product in featuredProducts" :key="product?.id">
             <CardContent class="p-0">
               <img
-                :src="getImageSrc(product)"
+                :src="`data:image/png;base64,${product.image}`"
                 :alt="product?.name"
                 class="w-full h-48 object-contain"
               />
@@ -195,15 +195,6 @@ onMounted(() => {
     router.push("/create");
   }
 });
-const getImageSrc = (product) => {
-  if (product?.image?.data && Array.isArray(product.image.data)) {
-    const binaryString = String.fromCharCode(
-      ...new Uint8Array(product.image.data)
-    );
-    return `data:image/jpeg;base64,${btoa(binaryString)}`;
-  }
-  return "";
-};
 const subscribeNewsletter = () => {
   // Implement newsletter subscription logic here
   console.log("Subscribing email:", email.value);
