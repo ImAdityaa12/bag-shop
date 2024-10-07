@@ -60,11 +60,37 @@
           </div>
         </div>
       </main>
+      <main v-else class="ml-64">
+        <div
+          class="flex flex-col items-center justify-center min-h-[400px] text-center px-4 py-10 bg-gray-100 rounded-lg"
+        >
+          <Heart class="h-12 w-12 text-gray-400 mb-4" />
+          <h2 class="text-2xl font-semibold tracking-tight mb-2">
+            No favorite products yet
+          </h2>
+          <p class="text-gray-600 mb-6 max-w-sm">
+            Start adding products to your favorites list to keep track of items
+            you love.
+          </p>
+          <button
+            class="inline-flex items-center px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            @click="navigateToProducts"
+          >
+            <ShoppingBag class="mr-2 h-4 w-4" />
+            Browse Products
+          </button>
+        </div>
+      </main>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ShoppingBag } from "lucide-vue-next";
+
+const navigateToProducts = () => {
+  router.push("/shop");
+};
 interface Product {
   id: string;
   name: string;
@@ -72,7 +98,7 @@ interface Product {
   discount: number;
   image: string;
 }
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { PlusIcon, Check, Heart } from "lucide-vue-next";
 import Sidebar from "@/components/Sidebar.vue";
 import { getCookie } from "@/lib/utils";
@@ -88,7 +114,7 @@ const productStore = useProductStore();
 // State for products and loading status
 const isLoading = ref(false);
 const products = ref<Product[]>([]);
-
+const forceRefresh = ref(false);
 // Fetch products when component is mounted
 const getProducts = async () => {
   isLoading.value = true;
@@ -103,7 +129,9 @@ const getProducts = async () => {
     isLoading.value = false;
   }
 };
-
+watch(forceRefresh, () => {
+  getProducts();
+});
 // Called when the component is mounted
 const router = useRouter();
 onMounted(() => {
@@ -122,16 +150,7 @@ const removeFav = async (productId: string) => {
       toast({
         title: "Product removed from favorites",
       });
-      const updatedProducts = products.value.map((product) => {
-        if (product.id === productId) {
-          return {
-            ...product,
-            isLiked: false,
-          };
-        }
-        return product;
-      });
-      products.value = updatedProducts;
+      forceRefresh.value = !forceRefresh.value;
     } else {
       toast({
         title:
