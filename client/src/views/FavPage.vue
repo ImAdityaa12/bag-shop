@@ -16,7 +16,7 @@
         >
           <div
             v-for="product in products"
-            :key="product._id"
+            :key="product.id"
             class="relative bg-white rounded-lg shadow-md overflow-hidden"
           >
             <img
@@ -26,14 +26,9 @@
             />
             <div
               class="absolute top-2 right-2 cursor-pointer"
-              @click="
-                product.isLiked ? removeFav(product._id) : addFav(product._id)
-              "
+              @click="removeFav(product.id)"
             >
-              <Heart
-                :fill="product.isLiked ? 'red' : 'none'"
-                class="text-red-500"
-              />
+              <Heart fill="red" class="text-red-500" />
             </div>
             <div class="p-4 bg-gray-200">
               <h2 class="font-semibold">{{ product.name }}</h2>
@@ -49,14 +44,14 @@
                 <Button
                   @click="productStore.addProduct(product as any)"
                   v-if="
-                    !productStore.products.some((p) => p._id === product._id)
+                    !productStore.products.some((p) => p._id === product.id)
                   "
                 >
                   <PlusIcon />
                 </Button>
                 <Button
                   v-else
-                  @click="productStore.increaseQuantity(product._id)"
+                  @click="productStore.increaseQuantity(product.id)"
                 >
                   <Check />
                 </Button>
@@ -71,24 +66,23 @@
 
 <script setup lang="ts">
 interface Product {
-  _id: string;
+  id: string;
   name: string;
   price: number;
   discount: number;
   image: string;
-  isLiked: boolean;
 }
 import { onMounted, ref } from "vue";
 import { PlusIcon, Check, Heart } from "lucide-vue-next";
 import Sidebar from "@/components/Sidebar.vue";
-import { getALLProductsAPI } from "@/api/getALLProductsAPI";
 import { getCookie } from "@/lib/utils";
 import { useRouter } from "vue-router";
 import Navbar from "@/components/Navbar.vue";
 import { Button } from "@/components/ui/button";
 import { useProductStore } from "@/store/cart";
-import { addFavariteItemAPI } from "@/api/addFavariteItemAPI";
+
 import { toast } from "@/components/ui/toast";
+import { getFavItems } from "@/api/getfavItems";
 import { removeFavariteItemAPI } from "@/api/removeFavItemAPI";
 const productStore = useProductStore();
 // State for products and loading status
@@ -98,7 +92,7 @@ const products = ref<Product[]>([]);
 // Fetch products when component is mounted
 const getProducts = async () => {
   isLoading.value = true;
-  const response = await getALLProductsAPI();
+  const response = await getFavItems();
   if (response.status === 200) {
     products.value = response.data;
     isLoading.value = false;
@@ -109,6 +103,18 @@ const getProducts = async () => {
     isLoading.value = false;
   }
 };
+
+// Called when the component is mounted
+const router = useRouter();
+onMounted(() => {
+  let cookie = getCookie("token");
+  if (!cookie) {
+    router.push("/create");
+  } else {
+    getProducts();
+  }
+});
+
 const removeFav = async (productId: string) => {
   try {
     const response = await removeFavariteItemAPI(productId);
@@ -117,7 +123,7 @@ const removeFav = async (productId: string) => {
         title: "Product removed from favorites",
       });
       const updatedProducts = products.value.map((product) => {
-        if (product._id === productId) {
+        if (product.id === productId) {
           return {
             ...product,
             isLiked: false,
@@ -139,55 +145,4 @@ const removeFav = async (productId: string) => {
     });
   }
 };
-// Called when the component is mounted
-const router = useRouter();
-onMounted(() => {
-  let cookie = getCookie("token");
-  if (!cookie) {
-    router.push("/create");
-  } else {
-    getProducts();
-  }
-});
-
-const addFav = async (productId: string) => {
-  try {
-    const response = await addFavariteItemAPI(productId);
-    if (response.status === 200) {
-      toast({
-        title: "Product added to favorites",
-      });
-      const updatedProducts = products.value.map((product) => {
-        if (product._id === productId) {
-          return {
-            ...product,
-            isLiked: true,
-          };
-        }
-        return product;
-      });
-      products.value = updatedProducts;
-    } else {
-      toast({
-        title:
-          "An error occurred while adding product to favorites. Please try again.",
-      });
-    }
-  } catch (error) {
-    toast({
-      title:
-        "An error occurred while adding product to favorites. Please try again.",
-    });
-  }
-};
-// Convert image data to base64 format for rendering in <img> tag
-// const getImageSrc = (product: any) => {
-//   if (product?.image?.data && Array.isArray(product.image.data)) {
-//     const binaryString = String.fromCharCode(
-//       ...new Uint8Array(product.image.data)
-//     );
-//     return `data:image/jpeg;base64,${btoa(binaryString)}`;
-//   }
-//   return "";
-// };
 </script>

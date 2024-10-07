@@ -6,6 +6,7 @@ import CreateProduct from "./views/CreateProduct.vue";
 import Shop from "./views/Shop.vue";
 import AboutUs from "./views/AboutUs.vue";
 import ContactUs from "./views/ContactUs.vue";
+import FavPage from "./views/FavPage.vue";
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -32,6 +33,10 @@ const router = createRouter({
     {
       path: "/contact",
       component: ContactUs,
+    },
+    {
+      path: "/favorites",
+      component: FavPage,
     },
   ],
 });

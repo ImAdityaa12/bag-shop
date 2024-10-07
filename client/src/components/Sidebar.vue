@@ -42,7 +42,7 @@ import {
 import { toast } from "./ui/toast";
 
 const menuItems = [
-  { name: "Homepage", path: "/", icon: HomeIcon },
+  { name: "Homepage", path: "/shop", icon: HomeIcon },
   { name: "Create Product", path: "/create-product", icon: PlusCircleIcon },
   { name: "Favorites", path: "/favorites", icon: Heart },
   { name: "About Us", path: "/about", icon: UserCheck },

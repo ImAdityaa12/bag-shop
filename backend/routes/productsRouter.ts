@@ -1,15 +1,28 @@
 import express from "express";
 import upload from "../config/multer-config";
 import productModel from "../models/productModel";
-
+import jwt from "jsonwebtoken";
+import { Request, Response } from "express";
+import userModel from "../models/userModel";
 const router = express.Router();
-router.get("/", async function (req, res) {
+router.get("/", async function (req: Request, res: Response) {
+  if (!req.headers.authorization) {
+    return res.status(401).send("Authorization header is missing");
+  }
+
   try {
     const products = await productModel.find();
-    if (!products) {
-      return res.status(404).send("No products found");
-    }
-    return res.status(200).json(products);
+    const { email } = jwt.decode(req.headers.authorization.split(" ")[1]) as {
+      email: string;
+      id: string;
+      iat: number;
+    };
+    const user = await userModel.findOne({ email });
+    const productsWithLikeStatus = products.map((product) => {
+      const isLiked = product.likedBy.includes(user?.id);
+      return { ...product.toObject(), isLiked };
+    });
+    return res.status(200).json(productsWithLikeStatus);
   } catch (error) {
     console.error(error);
     return res.status(500).send("An error occurred while fetching products");
